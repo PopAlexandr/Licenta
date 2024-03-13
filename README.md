@@ -1,0 +1,2 @@
+# Licenta
+Blackjack Simulator
