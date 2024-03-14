@@ -23,20 +23,23 @@ def check_for_blackjack(hand, total):
     return len(hand) == 2 and total == 21
 
 
-def reshuffle(cutting_card, deck, deck_count):
-    l = len(deck)
+def reshuffle(deck, deck_count):
+
     deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * (4 * deck_count)
+    l = len(deck)
     random.shuffle(deck)
     cutting_card = random.randrange(int(0.45 * l), int(0.55 * l))
-    return deck
+    return cutting_card,deck
 
 
 def simulate_blackjack1(deck_count, num_simulations):
     deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * (4 * deck_count)
     cutting_card = random.randrange(int(0.45 * len(deck)), int(0.55 * len(deck)))
+    print(cutting_card)
     random.shuffle(deck)
 
     win_probabilities = []
+    moneyrecord=[]
     wins = 0
     losses = 0
     pushes = 0
@@ -68,14 +71,14 @@ def simulate_blackjack1(deck_count, num_simulations):
                     #print("Dealer's hand : [11, 10] \nBoth the player and the dealer have blackjack. Push(tie)")
                     pushes += 1
                     if len(deck) <= cutting_card:
-                        deck = reshuffle(cutting_card, deck, deck_count)
+                        cutting_card,deck = reshuffle(deck, deck_count)
                     continue
                 else:
                     #print("Dealer's hand : [11, 10] \nDealer has blackjack. Player loses")
                     losses += 1
                     money -= 5
                     if len(deck) <= cutting_card:
-                        deck = reshuffle(cutting_card, deck, deck_count)
+                        cutting_card,deck = reshuffle(deck, deck_count)
                     continue
 
             if check_for_blackjack(player_hand, player_total):
@@ -83,7 +86,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 wins += 1
                 money += 7.5
                 if len(deck) <= cutting_card:
-                    deck = reshuffle(cutting_card, deck, deck_count)
+                    cutting_card,deck = reshuffle(deck, deck_count)
                 continue
             if player_total == 12 and (player_hand[0] == 1 or player_hand[1] == 1):
                 #print("split aces")
@@ -504,20 +507,21 @@ def simulate_blackjack1(deck_count, num_simulations):
                         money += 5
 
             if len(deck) <= cutting_card:
-                deck = reshuffle(cutting_card, deck, deck_count)
+                cutting_card,deck = reshuffle(deck, deck_count)
             win_probabilities.append(wins / actual_sims)
+            moneyrecord.append(money)
             pbar.update(1)
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money
+    return win_probabilities, wins, losses, pushes, money,moneyrecord
 
 
 def simulate_blackjack2(deck_count, num_simulations):
     deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * (4 * deck_count)
     cutting_card = random.randrange(int(0.45 * len(deck)), int(0.55 * len(deck)))
     random.shuffle(deck)
-
+    moneyrecord2=[]
     win_probabilities = []
     wins = 0
     losses = 0
@@ -573,7 +577,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     pushes += 1
                     count -= 1
                     if len(deck) <= cutting_card:
-                        deck = reshuffle(cutting_card, deck, deck_count)
+                        cutting_card,deck = reshuffle(deck, deck_count)
                         count = 0
                     continue
 
@@ -581,7 +585,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     pushes += 1
                     count -= 1
                     if len(deck) <= cutting_card:
-                        deck = reshuffle(cutting_card, deck, deck_count)
+                        cutting_card,deck = reshuffle(deck, deck_count)
                         count = 0
                     continue
                 else:
@@ -590,7 +594,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     count -= 1
                     money -= bet_size
                     if len(deck) <= cutting_card:
-                        deck = reshuffle(cutting_card, deck, deck_count)
+                        cutting_card,deck = reshuffle(deck, deck_count)
                         count = 0
                     continue
 
@@ -603,7 +607,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     count -= 1
                 money += bet_size * 1.5
                 if len(deck) <= cutting_card:
-                    deck = reshuffle(cutting_card, deck, deck_count)
+                    cutting_card,deck = reshuffle(deck, deck_count)
                     count = 0
                 continue
 
@@ -985,20 +989,21 @@ def simulate_blackjack2(deck_count, num_simulations):
                     money += bet_size
 
             if len(deck) <= cutting_card:
-                deck = reshuffle(cutting_card, deck, deck_count)
+                cutting_card,deck = reshuffle(deck, deck_count)
                 count = 0
             win_probabilities.append(wins / actual_sims)
+            moneyrecord2.append(money)
             pbar.update(1)
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money
+    return win_probabilities, wins, losses, pushes, money,moneyrecord2
 
 
 decks = 8
 sims = 1000000
-win_probabilities, wins, losses, pushes, money = simulate_blackjack1(decks, sims)
-win_probabilities2, wins2, losses2, pushes2, money2 = simulate_blackjack2(decks, sims)
+win_probabilities, wins, losses, pushes, money,moneyrecord = simulate_blackjack1(decks, sims)
+win_probabilities2, wins2, losses2, pushes2, money2,moneyrecord2 = simulate_blackjack2(decks, sims)
 print(money)
 print(int(money2))
 window_size = 10000  # Adjust this value to control the smoothing
@@ -1023,15 +1028,6 @@ plt.title(f'Win Probability Over Time (Moving Average2, Window Size: {window_siz
 plt.grid(True)
 plt.show()
 
-# win probability over time
-plt.figure(figsize=(10, 6))
-plt.plot(range(sims), win_probabilities)
-plt.xlabel('Number of Simulations')
-plt.ylabel('Win Probability')
-plt.title('Win Probability Over Time')
-plt.xlim(0, len(win_probabilities))  # Set the x-axis limits
-plt.grid(True)
-plt.show()
 
 # Win/Loss/Draw Distribution
 outcome_labels = ['Wins', 'Losses', 'Pushes']
@@ -1056,3 +1052,22 @@ plt.title('Win/Loss/Draw Distribution')
 plt.grid(True)
 plt.show()
 # print(f"Runtime: %s seconds (approx {prob_sec} hands analysed per second)." % (time.time() - start_time))
+#Money fluctuations over time1
+plt.figure(figsize=(10, 6))
+plt.plot(range(sims), moneyrecord)
+plt.xlabel('Number of Simulations')
+plt.ylabel('Money in the Bank')
+plt.title('Monetary Fluctuation')
+plt.xlim(0, len(moneyrecord))  # Set the x-axis limits
+plt.grid(True)
+plt.show()
+
+#Money fluctuations over time2
+plt.figure(figsize=(10, 6))
+plt.plot(range(sims), moneyrecord2)
+plt.xlabel('Number of Simulations')
+plt.ylabel('Money in the Bank')
+plt.title('Monetary fluctuation2')
+plt.xlim(0, len(moneyrecord2))  # Set the x-axis limits
+plt.grid(True)
+plt.show()
