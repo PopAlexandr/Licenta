@@ -24,12 +24,11 @@ def check_for_blackjack(hand, total):
 
 
 def reshuffle(deck, deck_count):
-
     deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * (4 * deck_count)
     l = len(deck)
     random.shuffle(deck)
     cutting_card = random.randrange(int(0.45 * l), int(0.55 * l))
-    return cutting_card,deck
+    return cutting_card, deck
 
 
 def simulate_blackjack1(deck_count, num_simulations):
@@ -39,12 +38,14 @@ def simulate_blackjack1(deck_count, num_simulations):
     random.shuffle(deck)
 
     win_probabilities = []
-    moneyrecord=[]
+    moneyrecord = []
     wins = 0
     losses = 0
     pushes = 0
     actual_sims = 0
-    money = 0
+    splits = 0
+    doubles = 0
+    money = 5000
 
     with tqdm(total=num_simulations, ncols=80,
               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [Time elapsed: {elapsed}, Time remaining: {remaining}, '
@@ -55,8 +56,9 @@ def simulate_blackjack1(deck_count, num_simulations):
             player_hand = [deck.pop(), deck.pop()]
             player_total = sum(player_hand)
             player_hand = check_for_ace(player_hand, player_total)
+            player_total=sum(player_hand)
             player_total2 = 0
-            player_hand2=0
+            player_hand2 = []
             double = 0
             split = 0
             dealer_hand = [deck.pop(), deck.pop()]
@@ -66,19 +68,19 @@ def simulate_blackjack1(deck_count, num_simulations):
             #print("Player's Hand:", player_hand)
             #print("Dealer's Hand:", [dealer_hand[0], "?"])
 
-            if check_for_blackjack(dealer_hand, dealer_total):
+            if check_for_blackjack(dealer_hand, dealer_total) and dealer_hand[0]==11:
                 if check_for_blackjack(player_hand, player_total):
                     #print("Dealer's hand : [11, 10] \nBoth the player and the dealer have blackjack. Push(tie)")
                     pushes += 1
                     if len(deck) <= cutting_card:
-                        cutting_card,deck = reshuffle(deck, deck_count)
+                        cutting_card, deck = reshuffle(deck, deck_count)
                     continue
                 else:
                     #print("Dealer's hand : [11, 10] \nDealer has blackjack. Player loses")
                     losses += 1
                     money -= 5
                     if len(deck) <= cutting_card:
-                        cutting_card,deck = reshuffle(deck, deck_count)
+                        cutting_card, deck = reshuffle(deck, deck_count)
                     continue
 
             if check_for_blackjack(player_hand, player_total):
@@ -86,10 +88,11 @@ def simulate_blackjack1(deck_count, num_simulations):
                 wins += 1
                 money += 7.5
                 if len(deck) <= cutting_card:
-                    cutting_card,deck = reshuffle(deck, deck_count)
+                    cutting_card, deck = reshuffle(deck, deck_count)
                 continue
             if player_total == 12 and (player_hand[0] == 1 or player_hand[1] == 1):
                 #print("split aces")
+                splits += 1
                 split = 1
                 player_hand = [11, deck.pop()]
                 player_hand2 = [11, deck.pop()]
@@ -97,6 +100,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 9 and (2 <= dealer_hand[0] <= 6 or 8 <= dealer_hand[0] <= 9):
                 #print("split nines")
+                splits += 1
                 split = 1
                 player_hand = [9, deck.pop()]
                 player_hand2 = [9, deck.pop()]
@@ -104,6 +108,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 8:
                 #print("split eights")
+                splits += 1
                 split = 1
                 player_hand = [8, deck.pop()]
                 player_hand2 = [8, deck.pop()]
@@ -111,6 +116,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 7 and dealer_hand[0] <= 7:
                 #print("split sevens")
+                splits += 1
                 split = 1
                 player_hand = [7, deck.pop()]
                 player_hand2 = [7, deck.pop()]
@@ -118,6 +124,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 6 and dealer_hand[0] <= 6:
                 #print("split sixs")
+                splits += 1
                 split = 1
                 player_hand = [6, deck.pop()]
                 player_hand2 = [6, deck.pop()]
@@ -125,6 +132,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 4 and (dealer_hand[0] == 5 or dealer_hand[0] == 6):
                 #print("split fours")
+                splits += 1
                 split = 1
                 player_hand = [4, deck.pop()]
                 player_hand2 = [4, deck.pop()]
@@ -132,6 +140,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 3 and dealer_hand[0] <= 7:
                 #print("split threes")
+                splits += 1
                 split = 1
                 player_hand = [3, deck.pop()]
                 player_hand2 = [3, deck.pop()]
@@ -139,6 +148,7 @@ def simulate_blackjack1(deck_count, num_simulations):
                 player_total2 = sum(player_hand2)
             if player_hand[0] == player_hand[1] == 2 and dealer_hand[0] <= 7:
                 #print("split twos")
+                splits += 1
                 split = 1
                 player_hand = [2, deck.pop()]
                 player_hand2 = [2, deck.pop()]
@@ -151,8 +161,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                         #print("Player stands")
                         break
                     elif player_total == 19:
-                        if dealer_hand[0] == 6 and len(player_hand)==2:
+                        if dealer_hand[0] == 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
@@ -164,10 +175,11 @@ def simulate_blackjack1(deck_count, num_simulations):
                             #print("Player stands")
                             break
                     elif player_total == 18:
-                        if 2 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 2 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
-                            player_total=sum(player_hand)
+                            player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                             double = 1
@@ -181,8 +193,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                             #print("Player stands")
                             break
                     elif player_total == 17:
-                        if 3 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 3 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
@@ -195,8 +208,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                     elif player_total == 16:
-                        if 4 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 4 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
@@ -209,8 +223,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                     elif player_total == 15:
-                        if 4 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 4 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
@@ -223,8 +238,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                     elif player_total == 14:
-                        if 5 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 5 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
@@ -237,8 +253,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                     elif player_total == 13:
-                        if 5 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 5 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand.append(deck.pop())
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
@@ -269,24 +286,27 @@ def simulate_blackjack1(deck_count, num_simulations):
                     elif player_total == 12 and 4 <= dealer_hand[0] <= 6:
                         #print("Player stands")
                         break
-                    elif player_total == 11 and len(player_hand)==2:
+                    elif player_total == 11 and len(player_hand) == 2:
                         #print("Player doubles")
+                        doubles += 1
                         player_hand.append(deck.pop())
                         player_total = sum(player_hand)
                         player_hand = check_for_ace(player_hand, player_total)
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand)==2:
+                    elif player_total == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand) == 2:
                         #print("Player doubles")
+                        doubles += 1
                         player_hand.append(deck.pop())
                         player_total = sum(player_hand)
                         player_hand = check_for_ace(player_hand, player_total)
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                    elif player_total == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                         #print("Player doubles")
+                        doubles += 1
                         player_hand.append(deck.pop())
                         player_total = sum(player_hand)
                         player_hand = check_for_ace(player_hand, player_total)
@@ -306,8 +326,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                             #print("Player stands")
                             break
                         elif player_total2 == 19:
-                            if dealer_hand[0] == 6 and len(player_hand2)==2:
+                            if dealer_hand[0] == 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -319,8 +340,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                                 #print("Player stands")
                                 break
                         elif player_total2 == 18:
-                            if 2 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                            if 2 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -336,8 +358,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                                 #print("Player stands")
                                 break
                         elif player_total2 == 17:
-                            if 3 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                            if 3 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -350,8 +373,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
                                 player_total2 = sum(player_hand2)
                         elif player_total2 == 16:
-                            if 4 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                            if 4 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -364,8 +388,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
                                 player_total2 = sum(player_hand2)
                         elif player_total2 == 15:
-                            if 4 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                            if 4 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -378,8 +403,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
                                 player_total2 = sum(player_hand2)
                         elif player_total2 == 14:
-                            if 5 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                            if 5 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -392,8 +418,9 @@ def simulate_blackjack1(deck_count, num_simulations):
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
                                 player_total2 = sum(player_hand2)
                         elif player_total2 == 13:
-                            if 5 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                            if 5 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                                 #print("Player doubles")
+                                doubles += 1
                                 player_hand2.append(deck.pop())
                                 player_total2 = sum(player_hand2)
                                 player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -424,24 +451,27 @@ def simulate_blackjack1(deck_count, num_simulations):
                         elif player_total2 == 12 and 4 <= dealer_hand[0] <= 6:
                             #print("Player stands")
                             break
-                        elif player_total2 == 11 and len(player_hand2)==2:
+                        elif player_total2 == 11 and len(player_hand2) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand2.append(deck.pop())
                             player_total2 = sum(player_hand2)
                             player_hand2 = check_for_ace(player_hand2, player_total2)
                             player_total2 = sum(player_hand2)
                             double = 1
                             break
-                        elif player_total2 == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand2)==2:
+                        elif player_total2 == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand2) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand2.append(deck.pop())
                             player_total2 = sum(player_hand2)
                             player_hand2 = check_for_ace(player_hand2, player_total2)
                             player_total2 = sum(player_hand2)
                             double = 1
                             break
-                        elif player_total2 == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand2)==2:
+                        elif player_total2 == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
                             #print("Player doubles")
+                            doubles += 1
                             player_hand2.append(deck.pop())
                             player_total2 = sum(player_hand2)
                             player_hand2 = check_for_ace(player_hand2, player_total2)
@@ -458,7 +488,7 @@ def simulate_blackjack1(deck_count, num_simulations):
             #if split==1:
                 #print("Player's Hand 2: ", player_hand2)
 
-            if player_total <= 21 or (player_total2 <= 21 and split==1):
+            if player_total <= 21 or (player_total2 <= 21 and split == 1):
                 while dealer_total < 17:
                     dealer_hand.append(deck.pop())
                     dealer_total = sum(dealer_hand)
@@ -507,27 +537,27 @@ def simulate_blackjack1(deck_count, num_simulations):
                         money += 5
 
             if len(deck) <= cutting_card:
-                cutting_card,deck = reshuffle(deck, deck_count)
+                cutting_card, deck = reshuffle(deck, deck_count)
             win_probabilities.append(wins / actual_sims)
             moneyrecord.append(money)
             pbar.update(1)
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money,moneyrecord
+    return win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits
 
 
 def simulate_blackjack2(deck_count, num_simulations):
     deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * (4 * deck_count)
     cutting_card = random.randrange(int(0.45 * len(deck)), int(0.55 * len(deck)))
     random.shuffle(deck)
-    moneyrecord2=[]
+    moneyrecord2 = []
     win_probabilities = []
     wins = 0
     losses = 0
     pushes = 0
     actual_sims = 0
-    money = 0
+    money = 5000
     bet_unit = 5
     count = 0
 
@@ -558,9 +588,12 @@ def simulate_blackjack2(deck_count, num_simulations):
                 count -= 1
             dealer_total = sum(dealer_hand)
             true_count = count / (len(deck) / 52)
-            bet_size = (true_count - 1) * bet_unit * 2
+            bet_size = (true_count - 1) * bet_unit
             if bet_size <= 0:
                 bet_size = 1
+            if money>4:
+                if bet_size>=money/4:
+                    bet_size=money/4
 
                 # print("-----")
                 # print("Player's Hand:", player_hand)
@@ -570,14 +603,14 @@ def simulate_blackjack2(deck_count, num_simulations):
                     insurance = 1
                     bet_size += bet_size / 2
 
-            if check_for_blackjack(dealer_hand, dealer_total):
+            if check_for_blackjack(dealer_hand, dealer_total) and dealer_hand[0]==11:
 
                 if check_for_blackjack(player_hand, player_total):
                     # print("Dealer's hand : [11, 10] \nBoth the player and the dealer have blackjack. Push(tie)")
                     pushes += 1
                     count -= 1
                     if len(deck) <= cutting_card:
-                        cutting_card,deck = reshuffle(deck, deck_count)
+                        cutting_card, deck = reshuffle(deck, deck_count)
                         count = 0
                     continue
 
@@ -585,7 +618,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     pushes += 1
                     count -= 1
                     if len(deck) <= cutting_card:
-                        cutting_card,deck = reshuffle(deck, deck_count)
+                        cutting_card, deck = reshuffle(deck, deck_count)
                         count = 0
                     continue
                 else:
@@ -594,7 +627,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     count -= 1
                     money -= bet_size
                     if len(deck) <= cutting_card:
-                        cutting_card,deck = reshuffle(deck, deck_count)
+                        cutting_card, deck = reshuffle(deck, deck_count)
                         count = 0
                     continue
 
@@ -607,7 +640,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     count -= 1
                 money += bet_size * 1.5
                 if len(deck) <= cutting_card:
-                    cutting_card,deck = reshuffle(deck, deck_count)
+                    cutting_card, deck = reshuffle(deck, deck_count)
                     count = 0
                 continue
 
@@ -640,7 +673,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
 
-                        elif dealer_hand[0] == 6 and len(player_hand)==2:
+                        elif dealer_hand[0] == 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -656,7 +689,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                             # print("Player stands")
                             break
                     elif player_total == 18:
-                        if 2 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 2 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -683,7 +716,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     elif player_total == 17:
                         if true_count > 0 and dealer_hand[0] == 2:
                             break
-                        elif 3 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        elif 3 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -705,7 +738,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                     elif player_total == 16:
-                        if 4 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 4 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -727,7 +760,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                             player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
                     elif player_total == 15:
-                        if 4 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 4 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -750,7 +783,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                             player_total = sum(player_hand)
 
                     elif player_total == 14:
-                        if 5 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 5 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -772,7 +805,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                             player_hand = check_for_ace(player_hand, player_total)
                             player_total = sum(player_hand)
                     elif player_total == 13:
-                        if 5 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                        if 5 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
                             player_hand.append(deck.pop())
                             if (player_hand[len(player_hand) - 1]) < 7:
@@ -826,7 +859,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         player_hand = check_for_ace(player_hand, player_total)
                         player_total = sum(player_hand)
-                    elif player_total == 11 and true_count > 0 and dealer_hand[0] == 11 and len(player_hand)==2:
+                    elif player_total == 11 and true_count > 0 and dealer_hand[0] == 11 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -838,7 +871,8 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 10 and true_count > 3 and (dealer_hand == 11 or dealer_hand == 10) and len(player_hand)==2:
+                    elif player_total == 10 and true_count > 3 and (dealer_hand == 11 or dealer_hand == 10) and len(
+                            player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -850,7 +884,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 9 and true_count > 0 and dealer_hand == 2 and len(player_hand)==2:
+                    elif player_total == 9 and true_count > 0 and dealer_hand == 2 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -862,7 +896,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 9 and true_count > 2 and dealer_hand == 7 and len(player_hand)==2:
+                    elif player_total == 9 and true_count > 2 and dealer_hand == 7 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -874,7 +908,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 8 and true_count > 1 and dealer_hand == 6 and len(player_hand)==2:
+                    elif player_total == 8 and true_count > 1 and dealer_hand == 6 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -901,7 +935,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     elif player_total == 12 and 4 <= dealer_hand[0] <= 6:
                         # print("Player stands")
                         break
-                    elif player_total == 11 and len(player_hand)==2:
+                    elif player_total == 11 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -913,7 +947,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand)==2:
+                    elif player_total == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -925,7 +959,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_total = sum(player_hand)
                         double = 1
                         break
-                    elif player_total == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand)==2:
+                    elif player_total == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                         # print("Player doubles")
                         player_hand.append(deck.pop())
                         if (player_hand[len(player_hand) - 1]) < 7:
@@ -989,7 +1023,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     money += bet_size
 
             if len(deck) <= cutting_card:
-                cutting_card,deck = reshuffle(deck, deck_count)
+                cutting_card, deck = reshuffle(deck, deck_count)
                 count = 0
             win_probabilities.append(wins / actual_sims)
             moneyrecord2.append(money)
@@ -997,13 +1031,17 @@ def simulate_blackjack2(deck_count, num_simulations):
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money,moneyrecord2
+    return win_probabilities, wins, losses, pushes, money, moneyrecord2
 
 
 decks = 8
-sims = 1000000
-win_probabilities, wins, losses, pushes, money,moneyrecord = simulate_blackjack1(decks, sims)
-win_probabilities2, wins2, losses2, pushes2, money2,moneyrecord2 = simulate_blackjack2(decks, sims)
+sims = 100000
+win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits = simulate_blackjack1(decks, sims)
+win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2 = simulate_blackjack2(decks, sims)
+print("Win ratio 1st gen: ",wins/1000)
+print("Win ratio 2nd gen: ",wins2/1000)
+print("Number of doubles for 1st gen: ", doubles)
+print("Number of splits for 1st gen: ", splits)
 print(money)
 print(int(money2))
 window_size = 10000  # Adjust this value to control the smoothing
@@ -1028,7 +1066,6 @@ plt.title(f'Win Probability Over Time (Moving Average2, Window Size: {window_siz
 plt.grid(True)
 plt.show()
 
-
 # Win/Loss/Draw Distribution
 outcome_labels = ['Wins', 'Losses', 'Pushes']
 outcome_counts = [wins, losses, pushes]
@@ -1052,7 +1089,7 @@ plt.title('Win/Loss/Draw Distribution')
 plt.grid(True)
 plt.show()
 # print(f"Runtime: %s seconds (approx {prob_sec} hands analysed per second)." % (time.time() - start_time))
-#Money fluctuations over time1
+# Money fluctuations over time1
 plt.figure(figsize=(10, 6))
 plt.plot(range(sims), moneyrecord)
 plt.xlabel('Number of Simulations')
@@ -1062,7 +1099,7 @@ plt.xlim(0, len(moneyrecord))  # Set the x-axis limits
 plt.grid(True)
 plt.show()
 
-#Money fluctuations over time2
+# Money fluctuations over time2
 plt.figure(figsize=(10, 6))
 plt.plot(range(sims), moneyrecord2)
 plt.xlabel('Number of Simulations')
