@@ -37,6 +37,7 @@ def simulate_blackjack1(deck_count, num_simulations):
     print(cutting_card)
     random.shuffle(deck)
     dealer_busts=0
+    player_busts=0
     win_probabilities = []
     moneyrecord = []
     wins = 0
@@ -502,6 +503,7 @@ def simulate_blackjack1(deck_count, num_simulations):
 
             if player_total > 21 or (21 >= dealer_total > player_total):
                 # print("Player loses")
+
                 losses += 1
                 if double == 1:
                     money -= 10
@@ -537,6 +539,10 @@ def simulate_blackjack1(deck_count, num_simulations):
                         money += 5
             if dealer_total>21:
                 dealer_busts+=1
+            if player_total>21:
+                player_busts+=1
+            if player_total2>21:
+                player_busts+=1
             if len(deck) <= cutting_card:
                 cutting_card, deck = reshuffle(deck, deck_count)
             win_probabilities.append(wins / actual_sims)
@@ -545,7 +551,7 @@ def simulate_blackjack1(deck_count, num_simulations):
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits,dealer_busts
+    return win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits,dealer_busts,player_busts
 
 
 def simulate_blackjack2(deck_count, num_simulations):
@@ -557,8 +563,11 @@ def simulate_blackjack2(deck_count, num_simulations):
     wins = 0
     losses = 0
     pushes = 0
+    doubles2=0
+    splits2=0
     actual_sims = 0
     dealer_busts=0
+    player_busts=0
     money = 5000
     bet_unit = 5
     count = 0
@@ -582,6 +591,9 @@ def simulate_blackjack2(deck_count, num_simulations):
             player_total = sum(player_hand)
             player_hand = check_for_ace(player_hand, player_total)
             double = 0
+            split=0
+            player_total2 = 0
+            player_hand2 = []
             dealer_hand = [deck.pop(), deck.pop()]
             # print("Dealer hand: ", dealer_hand)
             if dealer_hand[0] < 7:
@@ -626,7 +638,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                         count = 0
                     continue
 
-                if insurance == 1:
+                elif insurance == 1:
                     pushes += 1
                     count -= 1
                     if len(deck) <= cutting_card:
@@ -655,7 +667,182 @@ def simulate_blackjack2(deck_count, num_simulations):
                     cutting_card, deck = reshuffle(deck, deck_count)
                     count = 0
                 continue
-
+            if player_total == 12 and (player_hand[0] == 1 or player_hand[1] == 1):
+                # print("split aces")
+                splits2 += 1
+                split = 1
+                player_hand = [11, deck.pop()]
+                player_hand2 = [11, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0]==player_hand[1]==10 and true_count>3 and dealer_hand[0]==6:
+                #print("split tens")
+                splits2+=1
+                split=1
+                player_hand=[10,deck.pop()]
+                player_hand2=[10,deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total=sum(player_hand)
+                player_total2=sum(player_hand2)
+            if player_hand[0]==player_hand[1]==10 and true_count>4 and dealer_hand[0]==5:
+                # print("split tens")
+                splits2 += 1
+                split = 1
+                player_hand = [10, deck.pop()]
+                player_hand2 = [10, deck.pop()]
+                if player_hand[1] < 7:
+                    count += 1
+                elif player_hand[1] > 9:
+                    count -= 1
+                if player_hand2[1] < 7:
+                    count += 1
+                elif player_hand2[1] > 9:
+                    count += 1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0]==player_hand[1]==10 and true_count>5 and dealer_hand[0]==4:
+                # print("split tens")
+                splits2 += 1
+                split = 1
+                player_hand = [10, deck.pop()]
+                player_hand2 = [10, deck.pop()]
+                if player_hand[1] < 7:
+                    count += 1
+                elif player_hand[1] > 9:
+                    count -= 1
+                if player_hand2[1] < 7:
+                    count += 1
+                elif player_hand2[1] > 9:
+                    count += 1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 9 and (2 <= dealer_hand[0] <= 6 or 8 <= dealer_hand[0] <= 9):
+                # print("split nines")
+                splits2 += 1
+                split = 1
+                player_hand = [9, deck.pop()]
+                player_hand2 = [9, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 8:
+                # print("split eights")
+                splits2 += 1
+                split = 1
+                player_hand = [8, deck.pop()]
+                player_hand2 = [8, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 7 and dealer_hand[0] <= 7:
+                # print("split sevens")
+                splits2 += 1
+                split = 1
+                player_hand = [7, deck.pop()]
+                player_hand2 = [7, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 6 and dealer_hand[0] <= 6:
+                # print("split sixs")
+                splits2 += 1
+                split = 1
+                player_hand = [6, deck.pop()]
+                player_hand2 = [6, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 4 and (dealer_hand[0] == 5 or dealer_hand[0] == 6):
+                # print("split fours")
+                splits2 += 1
+                split = 1
+                player_hand = [4, deck.pop()]
+                player_hand2 = [4, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 3 and dealer_hand[0] <= 7:
+                # print("split threes")
+                splits2 += 1
+                split = 1
+                player_hand = [3, deck.pop()]
+                player_hand2 = [3, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
+            if player_hand[0] == player_hand[1] == 2 and dealer_hand[0] <= 7:
+                # print("split twos")
+                splits2 += 1
+                split = 1
+                player_hand = [2, deck.pop()]
+                player_hand2 = [2, deck.pop()]
+                if player_hand[1]<7:
+                    count+=1
+                elif player_hand[1]>9:
+                    count-=1
+                if player_hand2[1]<7:
+                    count+=1
+                elif player_hand2[1]>9:
+                    count+=1
+                player_total = sum(player_hand)
+                player_total2 = sum(player_hand2)
             while player_total < 21:
                 # print("Player hand: ",player_hand)
                 # print("Dealer hand: ",dealer_hand)
@@ -769,8 +956,9 @@ def simulate_blackjack2(deck_count, num_simulations):
                             elif (player_hand[len(player_hand) - 1]) > 9:
                                 count -= 1
                             player_total = sum(player_hand)
-                            player_total = sum(player_hand)
                             player_hand = check_for_ace(player_hand, player_total)
+                            player_total = sum(player_hand)
+
                     elif player_total == 15:
                         if 4 <= dealer_hand[0] <= 6 and len(player_hand) == 2:
                             # print("Player doubles")
@@ -993,10 +1181,348 @@ def simulate_blackjack2(deck_count, num_simulations):
                         player_hand = check_for_ace(player_hand, player_total)
                         player_total = sum(player_hand)
                         # print("Player hits. New Hand:", player_hand)
+            if split==1:
+                while player_total2 < 21:
+                    # print("Player hand: ",player_hand)
+                    # print("Dealer hand: ",dealer_hand)
+                    # print("True count: ",true_count)
 
+                    if 11 in player_hand2:
+                        if player_total2 == 20:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 19:
+                            if true_count > 2 and dealer_hand[0] == 4:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                            elif true_count > 0 and (dealer_hand[0] == 5 or dealer_hand[0] == 6):
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+
+                            elif dealer_hand[0] == 6 and len(player_hand) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            else:
+                                # print("Player stands")
+                                break
+                        elif player_total2 == 18:
+                            if 2 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            elif 9 <= dealer_hand[0] <= 11:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                            else:
+                                # print("Player stands")
+                                break
+                        elif player_total2 == 17:
+                            if true_count > 0 and dealer_hand[0] == 2:
+                                break
+                            elif 3 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            else:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                        elif player_total2 == 16:
+                            if 4 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            else:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2=check_for_ace(player_hand2,player_total2)
+                                player_total2 = sum(player_hand2)
+
+                        elif player_total2 == 15:
+                            if 4 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            else:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+
+                        elif player_total2 == 14:
+                            if 5 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            else:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                        elif player_total2 == 13:
+                            if 5 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                                # print("Player doubles")
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+                                double = 1
+                                break
+                            else:
+                                player_hand2.append(deck.pop())
+                                if (player_hand2[len(player_hand2) - 1]) < 7:
+                                    count += 1
+                                elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                    count -= 1
+                                player_total2 = sum(player_hand2)
+                                player_hand2 = check_for_ace(player_hand2, player_total2)
+                                player_total2 = sum(player_hand2)
+
+                    else:
+                        if player_total2 >= 17:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 16 and true_count > -1 and dealer_hand[0] == 10:
+                            break
+                        elif player_total2 == 16 and true_count > 3 and dealer_hand[0] == 9:
+                            break
+                        elif player_total2 == 15 and true_count > 3 and dealer_hand[0] == 10:
+                            break
+                        elif player_total2 == 13 and true_count < 0 and dealer_hand[0] == 2:
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                        elif player_total2 == 12 and true_count > 2 and dealer_hand[0] == 2:
+                            break
+                        elif player_total2 == 12 and true_count > 1 and dealer_hand[0] == 3:
+                            break
+                        elif player_total2 == 12 and true_count < 0 and dealer_hand[0] == 4:
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                        elif player_total2 == 11 and true_count > 0 and dealer_hand[0] == 11 and len(player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 10 and true_count > 3 and (dealer_hand == 11 or dealer_hand == 10) and len(
+                                player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 9 and true_count > 0 and dealer_hand == 2 and len(player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 9 and true_count > 2 and dealer_hand == 7 and len(player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 8 and true_count > 1 and dealer_hand == 6 and len(player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 16 and 2 <= dealer_hand[0] <= 6:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 15 and 2 <= dealer_hand[0] <= 6:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 14 and 2 <= dealer_hand[0] <= 6:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 13 and 2 <= dealer_hand[0] <= 6:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 12 and 4 <= dealer_hand[0] <= 6:
+                            # print("Player stands")
+                            break
+                        elif player_total2 == 11 and len(player_hand) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 10 and 2 <= dealer_hand[0] <= 9 and len(player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        elif player_total2 == 9 and 3 <= dealer_hand[0] <= 6 and len(player_hand2) == 2:
+                            # print("Player doubles")
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            double = 1
+                            break
+                        else:
+                            player_hand2.append(deck.pop())
+                            if (player_hand2[len(player_hand2) - 1]) < 7:
+                                count += 1
+                            elif (player_hand2[len(player_hand2) - 1]) > 9:
+                                count -= 1
+                            player_total2 = sum(player_hand2)
+                            player_hand2 = check_for_ace(player_hand2, player_total2)
+                            player_total2 = sum(player_hand2)
+                            # print("Player hits. New Hand:", player_hand)
             # print("Player's Hand:", player_hand)
 
-            if player_total <= 21:
+            if player_total <= 21 or (player_total2<=21 and split==1):
                 while dealer_total < 17:
                     dealer_hand.append(deck.pop())
                     if (dealer_hand[len(dealer_hand) - 1]) < 7:
@@ -1033,8 +1559,29 @@ def simulate_blackjack2(deck_count, num_simulations):
                     money += bet_size * 2
                 else:
                     money += bet_size
+            if split==1:
+                if player_total2 > 21 or (21 >= dealer_total > player_total2):
+                    # print("Player loses")
+                    losses += 1
+                    if double == 1:
+                        money -= bet_size * 2
+                    else:
+                        money -= bet_size
+                elif check_for_push(player_total2, dealer_total):
+                    # print("Push (Tie)")
+                    pushes += 1
+                else:
+                    # print("Player wins")
+                    wins += 1
+                    if double == 1:
+                        money += bet_size * 2
+                    else:
+                        money += bet_size
+
             if dealer_total>21:
                 dealer_busts+=1
+            if player_total>21:
+                player_busts+=1
             if len(deck) <= cutting_card:
                 cutting_card, deck = reshuffle(deck, deck_count)
                 count = 0
@@ -1044,18 +1591,19 @@ def simulate_blackjack2(deck_count, num_simulations):
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money, moneyrecord2,dealer_busts
+    return win_probabilities, wins, losses, pushes, money, moneyrecord2,dealer_busts,player_busts
 
 
 decks = 6
 sims = 100000
-win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits,dealer_bust = simulate_blackjack1(decks, sims)
-win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2,dealer_bust2 = simulate_blackjack2(decks, sims)
+win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits,dealer_bust,player_bust = simulate_blackjack1(decks, sims)
+win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2,dealer_bust2,player_bust2 = simulate_blackjack2(decks, sims)
 print("Win ratio 1st gen: ", wins / 1000)
 print("Win ratio 2nd gen: ", wins2 / 1000)
 print("Number of doubles for 1st gen: ", doubles)
 print("Number of splits for 1st gen: ", splits)
 print("Dealer busts: ",dealer_bust)
+print("Player busts: ",player_bust)
 print("Dealer busts 2nd gen: ",dealer_bust2)
 print(money)
 print(int(money2))
