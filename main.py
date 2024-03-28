@@ -489,7 +489,9 @@ def simulate_blackjack1(deck_count, num_simulations):
             # print("Player's Hand:", player_hand)
             # if split==1:
             # print("Player's Hand 2: ", player_hand2)
-
+            dealer_total=sum(dealer_hand)
+            dealer_hand=check_for_ace(dealer_hand,dealer_total)
+            dealer_total=sum(dealer_hand)
             if player_total <= 21 or (player_total2 <= 21 and split == 1):
                 while dealer_total < 17:
                     dealer_hand.append(deck.pop())
@@ -592,6 +594,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                 count -= 1
             player_total = sum(player_hand)
             player_hand = check_for_ace(player_hand, player_total)
+            player_total=sum(player_hand)
             double = 0
             split_double=0
             split=0
@@ -606,18 +609,17 @@ def simulate_blackjack2(deck_count, num_simulations):
             dealer_total = sum(dealer_hand)
             true_count = round( count / (len(deck) / 52))
 
-            bet_unit=money/1000
+            bet_unit=5
 
             bet_size = (true_count - 1) * bet_unit
-            if true_count==0 or true_count==1:
-                bet_size=bet_unit
+            if true_count<=1:
+                bet_size=5
 
-            if bet_size <= 0:
-                bet_size = bet_unit
             if money > 4:
                 if bet_size >= money / 4:
                     bet_size = money / 4
-
+            if bet_size<5:
+                bet_size=5
             '''
             if true_count<=0:
                 bet_size=5
@@ -1040,7 +1042,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                     if player_total >= 17:
                         print("Player stands")
                         break
-                    elif player_total == 16 and true_count > -1 and dealer_hand[0] == 10:
+                    elif player_total == 16 and true_count > 0 and dealer_hand[0] == 10:
                         break
                     elif player_total == 16 and true_count > 3 and dealer_hand[0] == 9:
                         break
@@ -1530,7 +1532,9 @@ def simulate_blackjack2(deck_count, num_simulations):
                             player_total2 = sum(player_hand2)
                             print("Player hits. New Hand:", player_hand)
             print("Player's Hand:", player_hand)
-
+            dealer_total=sum(dealer_hand)
+            dealer_hand=check_for_ace(dealer_hand,dealer_total)
+            dealer_total=sum(dealer_hand)
             if player_total <= 21 or (player_total2<=21 and split==1):
                 while dealer_total < 17:
                     dealer_hand.append(deck.pop())
@@ -1618,6 +1622,10 @@ print("Dealer busts: ",dealer_bust)
 print("Player busts: ",player_bust)
 print("Dealer busts 2nd gen: ",dealer_bust2)
 print("Player busts 2nd gen: ",player_bust2)
+print("Lose ratio gen 1:",losses/1000)
+print("Lose ratio gen 2:",losses2/1000)
+print("Push ratio gen 1:",pushes/1000)
+print("Push ratio gen 2:",pushes2/1000)
 print(money)
 print(int(money2))
 window_size = 10000  # Adjust this value to control the smoothing
