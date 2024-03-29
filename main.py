@@ -1675,7 +1675,18 @@ for i in range(2):
                 color='r')
 cbar = ax.figure.colorbar(im, ax=ax, format='% .2f')
 plt.show()
-
+#Histograms
+plt.hist(moneyrecord,color='blue',edgecolor='black',bins=int(10))
+plt.title('Histogram of money 1st gen')
+plt.xlabel('moni')
+plt.ylabel('games')
+plt.hist(moneyrecord2,color='red',edgecolor='black',bins=int(10))
+plt.grid(True)
+plt.title('Histogram of money 2st gen')
+plt.xlabel('moni')
+plt.ylabel('games')
+plt.grid(True)
+plt.show()
 
 print(money)
 print(int(money2))
