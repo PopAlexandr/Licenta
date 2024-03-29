@@ -2,6 +2,7 @@ import random
 import time
 import scipy
 import statistics
+import seaborn
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
@@ -1637,6 +1638,9 @@ print("Average true count through the game gen 2", round(statistics.mean(final_t
 print("Variance money value through the game gen 1:", round(statistics.variance(moneyrecord), 2))
 print("Variance money value through the game gen 2:", round(statistics.variance(moneyrecord2), 2))
 print("Variance true count through the game gen 2", round(statistics.variance(final_true_count), 2))
+
+print(money)
+print(int(money2))
 # calculating correlation coefficients
 r = scipy.stats.pearsonr(moneyrecord2, final_true_count)
 rho = scipy.stats.spearmanr(moneyrecord2, final_true_count)
@@ -1688,8 +1692,25 @@ plt.ylabel('games2')
 plt.grid(True)
 plt.show()
 
-print(money)
-print(int(money2))
+#ECDF
+
+data=moneyrecord
+data2=moneyrecord2
+sorted_data=np.sort(data)
+sorted_data2=np.sort(data2)
+edf=np.arange(1,len(sorted_data)+1)/len(sorted_data)
+edf2=np.arange(1,len(sorted_data2)+1)/len(sorted_data2)
+plt.step(sorted_data, edf,label='moni 1', where='post')
+plt.step(sorted_data2, edf2, label='moni 2', where='post')
+plt.xlabel('Data')
+plt.ylabel('Empirical Distribution Function')
+plt.title('Empirical Distribution Function')
+plt.ylim(0, 1)  # Set y-axis limits
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
 window_size = 10000  # Adjust this value to control the smoothing
 moving_average = np.convolve(win_probabilities, np.ones(window_size) / window_size, mode='valid')
 moving_average2 = np.convolve(win_probabilities2, np.ones(window_size) / window_size, mode='valid')
