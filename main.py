@@ -576,6 +576,7 @@ def simulate_blackjack2(deck_count, num_simulations):
     dealer_busts = 0
     player_busts = 0
     player_busts_record=[]
+    bad_good_insurance = []
     dealer_busts_record=[]
     money = 5000
     # bet_unit =5
@@ -588,6 +589,7 @@ def simulate_blackjack2(deck_count, num_simulations):
               unit='hands', dynamic_ncols=True) as pbar:
         while actual_sims < sims:
             insurance = 0
+
             player_hand = [deck.pop(), deck.pop()]
             # print("Initial Player hand: ",player_hand)
             if player_hand[0] < 7:
@@ -657,8 +659,11 @@ def simulate_blackjack2(deck_count, num_simulations):
                     continue
 
                 elif insurance == 1:
+                    print("INSURANCE WORKED!!!")
+                    bad_good_insurance.append(1)
                     pushes += 1
                     count -= 1
+
                     if len(deck) <= cutting_card:
                         cutting_card, deck = reshuffle(deck, deck_count)
                         count = 0
@@ -1624,18 +1629,21 @@ def simulate_blackjack2(deck_count, num_simulations):
                 dealer_busts_record.append(1)
             else:
                 dealer_busts_record.append(0)
+            if insurance==1 and check_for_blackjack(dealer_hand,dealer_total)==0:
+                bad_good_insurance.append(0)
+
             pbar.update(1)
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money, moneyrecord2, dealer_busts, player_busts, all_true_counts,bet_sizes,player_busts_record,dealer_busts_record
+    return win_probabilities, wins, losses, pushes, money, moneyrecord2, dealer_busts, player_busts, all_true_counts,bet_sizes,player_busts_record,dealer_busts_record,bad_good_insurance
 
 
 decks = 6
 sims = 100000
 win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits, dealer_bust, player_bust = simulate_blackjack1(
     decks, sims)
-win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2, dealer_bust2, player_bust2, final_true_count, all_bet_sizes,player_busts_record_gen2,dealer_busts_record_gen2 = simulate_blackjack2(
+win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2, dealer_bust2, player_bust2, final_true_count, all_bet_sizes,player_busts_record_gen2,dealer_busts_record_gen2,insurance_efficiency = simulate_blackjack2(
     decks, sims)
 print("Win ratio 1st gen: ", wins / 1000)
 print("Win ratio 2nd gen: ", wins2 / 1000)
@@ -1673,6 +1681,14 @@ print("Kendall Correlation between true count and money record", tau)
 print("Pearson Correlation between true count and bet size: ",r_bet_size)
 print("Pearson Correlation between true count and player busts: ",r_busts_player)
 print("Pearson Correlation between true count and dealer busts: ",r_busts_dealer)
+#Did insurance work?
+plt.hist(insurance_efficiency,color='blue',edgecolor='black',bins=int(2))
+plt.title('Histogram of insurance efficiency')
+plt.xlabel('Did insurance work?')
+plt.ylabel('games')
+plt.grid(True)
+plt.show()
+
 
 #True count and bet size over time visualized
 fig, axs = plt.subplots(2, 1, figsize=(10,6))
