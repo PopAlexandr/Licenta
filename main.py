@@ -566,6 +566,7 @@ def simulate_blackjack2(deck_count, num_simulations):
     random.shuffle(deck)
     moneyrecord2 = []
     win_probabilities = []
+    bet_sizes=[]
     wins = 0
     losses = 0
     pushes = 0
@@ -574,6 +575,8 @@ def simulate_blackjack2(deck_count, num_simulations):
     actual_sims = 0
     dealer_busts = 0
     player_busts = 0
+    player_busts_record=[]
+    dealer_busts_record=[]
     money = 5000
     # bet_unit =5
     count = 0
@@ -636,6 +639,7 @@ def simulate_blackjack2(deck_count, num_simulations):
             print("Player's Hand:", player_hand)
             print("Dealer's Hand:", [dealer_hand[0], "?"])
             print("Bet size:", bet_size)
+
             if dealer_hand[0] == 11 and check_for_blackjack(player_hand, player_total) == 0:
                 if true_count > 3:
                     insurance = 1
@@ -1607,18 +1611,31 @@ def simulate_blackjack2(deck_count, num_simulations):
             win_probabilities.append(wins / actual_sims)
             moneyrecord2.append(money)
             all_true_counts.append(true_count)
+            bet_sizes.append(bet_size)
+            if player_total > 21 >= player_total2:
+                player_busts_record.append(1)
+            elif player_total2 > 21 >= player_total:
+                player_busts_record.append(1)
+            elif player_total<=21 and player_total2<=21:
+                player_busts_record.append(0)
+            else:
+                player_busts_record.append(2)
+            if dealer_total>21:
+                dealer_busts_record.append(1)
+            else:
+                dealer_busts_record.append(0)
             pbar.update(1)
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money, moneyrecord2, dealer_busts, player_busts, all_true_counts
+    return win_probabilities, wins, losses, pushes, money, moneyrecord2, dealer_busts, player_busts, all_true_counts,bet_sizes,player_busts_record,dealer_busts_record
 
 
 decks = 6
 sims = 100000
 win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits, dealer_bust, player_bust = simulate_blackjack1(
     decks, sims)
-win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2, dealer_bust2, player_bust2, final_true_count = simulate_blackjack2(
+win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2, dealer_bust2, player_bust2, final_true_count, all_bet_sizes,player_busts_record_gen2,dealer_busts_record_gen2 = simulate_blackjack2(
     decks, sims)
 print("Win ratio 1st gen: ", wins / 1000)
 print("Win ratio 2nd gen: ", wins2 / 1000)
@@ -1635,10 +1652,11 @@ print("Push ratio gen 2:", pushes2 / 1000)
 print("Average money value through the game gen 1:", round(statistics.mean(moneyrecord), 2))
 print("Average money value through the game gen 2:", round(statistics.mean(moneyrecord), 2))
 print("Average true count through the game gen 2", round(statistics.mean(final_true_count), 2))
+print("Average bet size value through gen 2:",round(statistics.mean(all_bet_sizes),2))
 print("Variance money value through the game gen 1:", round(statistics.variance(moneyrecord), 2))
 print("Variance money value through the game gen 2:", round(statistics.variance(moneyrecord2), 2))
-print("Variance true count through the game gen 2", round(statistics.variance(final_true_count), 2))
-
+print("Variance true count through the game gen 2:", round(statistics.variance(final_true_count), 2))
+print("Variance bet size through gen 2:",round(statistics.variance(all_bet_sizes),2))
 print(money)
 print(int(money2))
 # calculating correlation coefficients
@@ -1646,11 +1664,37 @@ r = scipy.stats.pearsonr(moneyrecord2, final_true_count)
 rho = scipy.stats.spearmanr(moneyrecord2, final_true_count)
 tau = scipy.stats.kendalltau(moneyrecord2, final_true_count)
 
-
+r_bet_size=scipy.stats.pearsonr(all_bet_sizes,final_true_count)
+r_busts_player=scipy.stats.pearsonr(player_busts_record_gen2,final_true_count)
+r_busts_dealer=scipy.stats.pearsonr(dealer_busts_record_gen2,final_true_count)
 print("Pearson Correlation between true count and money record \n If r is > 0 we have a positive correlation", r)
 print("Spearman Correlation between true count and money record", rho)
 print("Kendall Correlation between true count and money record", tau)
+print("Pearson Correlation between true count and bet size: ",r_bet_size)
+print("Pearson Correlation between true count and player busts: ",r_busts_player)
+print("Pearson Correlation between true count and dealer busts: ",r_busts_dealer)
 
+#True count and bet size over time visualized
+fig, axs = plt.subplots(2, 1, figsize=(10,6))
+
+# Plot True count over time
+axs[0].plot(range(sims), final_true_count)
+axs[0].set_xlabel('Number of Simulations')
+axs[0].set_ylabel('True count')
+axs[0].set_title('True count over time')
+axs[0].set_xlim(0, len(final_true_count))  # Set the x-axis limits
+axs[0].grid(True)
+
+# Plot Bet size fluctuation
+axs[1].plot(range(sims), all_bet_sizes)
+axs[1].set_xlabel('Number of Simulations')
+axs[1].set_ylabel('Bet size')
+axs[1].set_title('Bet size fluctuation')
+axs[1].set_xlim(0, len(all_bet_sizes))  # Set the x-axis limits
+axs[1].grid(True)
+
+plt.tight_layout()  # Adjust layout to prevent overlap
+plt.show()
 #regresion line
 '''
 slope, intercept, r_lin, p, stderr = scipy.stats.linregress(moneyrecord2, final_true_count)
@@ -1766,21 +1810,24 @@ plt.xlim(0, len(moneyrecord))  # Set the x-axis limits
 plt.grid(True)
 plt.show()
 
-# Money fluctuations over time2
-plt.figure(figsize=(10, 6))
-plt.plot(range(sims), moneyrecord2)
-plt.xlabel('Number of Simulations')
-plt.ylabel('Money in the Bank')
-plt.title('Monetary fluctuation2')
-plt.xlim(0, len(moneyrecord2))  # Set the x-axis limits
-plt.grid(True)
+# Money fluctuations over time2 + true count
+fig, axs = plt.subplots(2, 1, figsize=(10, 12))
 
-# true count fluctuation
-plt.figure(figsize=(10, 6))
-plt.plot(range(sims), final_true_count)
-plt.xlabel('Number of Simulations')
-plt.ylabel('True Count')
-plt.title('True count fluctuation')
-plt.xlim(0, len(final_true_count))
-plt.grid(True)
+# Plot True count over time
+axs[0].plot(range(sims), final_true_count)
+axs[0].set_xlabel('Number of Simulations')
+axs[0].set_ylabel('True count')
+axs[0].set_title('True count over time')
+axs[0].set_xlim(0, len(final_true_count))  # Set the x-axis limits
+axs[0].grid(True)
+
+# Plot Bet size fluctuation
+axs[1].plot(range(sims), moneyrecord2)
+axs[1].set_xlabel('Number of Simulations')
+axs[1].set_ylabel('Money in the bank')
+axs[1].set_title('Money fluctuation gen 2')
+axs[1].set_xlim(0, len(moneyrecord2))  # Set the x-axis limits
+axs[1].grid(True)
+
+plt.tight_layout()  # Adjust layout to prevent overlap
 plt.show()
