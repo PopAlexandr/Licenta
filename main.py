@@ -1631,24 +1631,29 @@ def simulate_blackjack2(deck_count, num_simulations):
                 dealer_busts_record.append(0)
             if insurance==1 and check_for_blackjack(dealer_hand,dealer_total)==0:
                 bad_good_insurance.append(0)
-
+            if double==1:
+                doubles2+=1
+            if split_double==1:
+                doubles2+=1
             pbar.update(1)
 
         pbar.update(num_simulations - pbar.n)
 
-    return win_probabilities, wins, losses, pushes, money, moneyrecord2, dealer_busts, player_busts, all_true_counts,bet_sizes,player_busts_record,dealer_busts_record,bad_good_insurance
+    return win_probabilities, wins, losses, pushes, money, moneyrecord2,doubles2,splits2, dealer_busts, player_busts, all_true_counts,bet_sizes,player_busts_record,dealer_busts_record,bad_good_insurance
 
 
 decks = 6
 sims = 100000
 win_probabilities, wins, losses, pushes, money, moneyrecord, doubles, splits, dealer_bust, player_bust = simulate_blackjack1(
     decks, sims)
-win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2, dealer_bust2, player_bust2, final_true_count, all_bet_sizes,player_busts_record_gen2,dealer_busts_record_gen2,insurance_efficiency = simulate_blackjack2(
+win_probabilities2, wins2, losses2, pushes2, money2, moneyrecord2,doubles_gen2,splits_gen2, dealer_bust2, player_bust2, final_true_count, all_bet_sizes,player_busts_record_gen2,dealer_busts_record_gen2,insurance_efficiency = simulate_blackjack2(
     decks, sims)
 print("Win ratio 1st gen: ", wins / 1000)
 print("Win ratio 2nd gen: ", wins2 / 1000)
 print("Number of doubles for 1st gen: ", doubles)
 print("Number of splits for 1st gen: ", splits)
+print("Number of doubles for 2nd gen: ",doubles_gen2)
+print("Number of splits for 2nd gen: ",splits_gen2)
 print("Dealer busts: ", dealer_bust)
 print("Player busts: ", player_bust)
 print("Dealer busts 2nd gen: ", dealer_bust2)
@@ -1675,12 +1680,15 @@ tau = scipy.stats.kendalltau(moneyrecord2, final_true_count)
 r_bet_size=scipy.stats.pearsonr(all_bet_sizes,final_true_count)
 r_busts_player=scipy.stats.pearsonr(player_busts_record_gen2,final_true_count)
 r_busts_dealer=scipy.stats.pearsonr(dealer_busts_record_gen2,final_true_count)
+
+r_winratio_truecount=scipy.stats.pearsonr(win_probabilities,final_true_count)
 print("Pearson Correlation between true count and money record \n If r is > 0 we have a positive correlation", r)
 print("Spearman Correlation between true count and money record", rho)
 print("Kendall Correlation between true count and money record", tau)
 print("Pearson Correlation between true count and bet size: ",r_bet_size)
 print("Pearson Correlation between true count and player busts: ",r_busts_player)
 print("Pearson Correlation between true count and dealer busts: ",r_busts_dealer)
+print("Pearson Correlation between true count and win-ratio: ",r_winratio_truecount)
 #Did insurance work?
 plt.hist(insurance_efficiency,color='blue',edgecolor='black',bins=int(2))
 plt.title('Histogram of insurance efficiency')
