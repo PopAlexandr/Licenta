@@ -643,9 +643,9 @@ def simulate_blackjack2(deck_count, num_simulations):
             print("Bet size:", bet_size)
 
             if dealer_hand[0] == 11 and check_for_blackjack(player_hand, player_total) == 0:
-                if true_count > 3:
+                if true_count >= 3:
                     insurance = 1
-                    bet_size += bet_size / 2
+
 
             if check_for_blackjack(dealer_hand, dealer_total) and dealer_hand[0] == 11:
 
@@ -1561,7 +1561,9 @@ def simulate_blackjack2(deck_count, num_simulations):
                         dealer_total = sum(dealer_hand)
 
             print("Dealer's Hand:", dealer_hand)
-
+            if insurance==1 and check_for_blackjack(dealer_hand,dealer_total)==0:
+                bad_good_insurance.append(0)
+                money-=bet_size/2
             actual_sims += 1
             if dealer_hand[1] < 7:
                 count += 1
@@ -1629,8 +1631,7 @@ def simulate_blackjack2(deck_count, num_simulations):
                 dealer_busts_record.append(1)
             else:
                 dealer_busts_record.append(0)
-            if insurance==1 and check_for_blackjack(dealer_hand,dealer_total)==0:
-                bad_good_insurance.append(0)
+
             if double==1:
                 doubles2+=1
             if split_double==1:
@@ -1663,7 +1664,7 @@ print("Lose ratio gen 2:", losses2 / 1000)
 print("Push ratio gen 1:", pushes / 1000)
 print("Push ratio gen 2:", pushes2 / 1000)
 print("Average money value through the game gen 1:", round(statistics.mean(moneyrecord), 2))
-print("Average money value through the game gen 2:", round(statistics.mean(moneyrecord), 2))
+print("Average money value through the game gen 2:", round(statistics.mean(moneyrecord2), 2))
 print("Average true count through the game gen 2", round(statistics.mean(final_true_count), 2))
 print("Average bet size value through gen 2:",round(statistics.mean(all_bet_sizes),2))
 print("Variance money value through the game gen 1:", round(statistics.variance(moneyrecord), 2))
