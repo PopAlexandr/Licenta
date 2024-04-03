@@ -576,10 +576,9 @@ def simulate_blackjack2(deck_count, num_simulations):
     dealer_busts = 0
     player_busts = 0
     player_busts_record=[]
-    bad_good_insurance = []
     dealer_busts_record=[]
+    bad_good_insurance = []
     money = 5000
-    # bet_unit =5
     count = 0
     all_true_counts = []
 
