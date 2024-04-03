@@ -642,7 +642,7 @@ def simulate_blackjack2(deck_count, num_simulations):
             print("Bet size:", bet_size)
 
             if dealer_hand[0] == 11 and check_for_blackjack(player_hand, player_total) == 0:
-                if true_count > 3:
+                if true_count >= 3:
                     insurance = 1
                     bet_size += bet_size / 2
 
